@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarketMarket 개발 현황</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #09090b; color: #e4e4e7; line-height: 1.6; }
+
+  .dash { max-width: 1320px; margin: 0 auto; padding: 28px 32px 80px; }
+
+  /* Header */
+  .hdr { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid #1c1c1e; }
+  .hdr h1 { font-size: 26px; font-weight: 700; color: #fafafa; }
+  .hdr span { font-size: 14px; color: #a1a1aa; }
+
+  /* Section */
+  .sec { margin-bottom: 28px; }
+  .sec-hdr { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .sec-title { font-size: 14px; font-weight: 700; color: #a1a1aa; letter-spacing: 1.5px; text-transform: uppercase; }
+  .sec-note { font-size: 13px; color: #71717a; }
+
+  /* ---- Stats Row ---- */
+  .stats { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr; gap: 10px; }
+  .st { background: #141416; border: 1px solid #27272a; border-radius: 10px; padding: 20px 22px; position: relative; }
+  .st-label { font-size: 13px; color: #a1a1aa; margin-bottom: 8px; font-weight: 500; }
+  .st-val { font-size: 36px; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
+  .st-desc { font-size: 13px; color: #a1a1aa; line-height: 1.5; }
+  .st.red { border-color: #7f1d1d; } .st.red .st-val { color: #f87171; }
+  .st.grn { border-color: #14532d; } .st.grn .st-val { color: #4ade80; }
+  .st.ylw { border-color: #713f12; } .st.ylw .st-val { color: #facc15; }
+  .st-tag { position: absolute; top: 10px; right: 12px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+  .st-tag.crit { background: #450a0a; color: #fca5a5; }
+  .st-tag.warn { background: #451a03; color: #fde68a; }
+  .st-tag.ok { background: #052e16; color: #86efac; }
+
+  /* ---- Pipeline ---- */
+  .pipe { display: flex; align-items: center; background: #141416; border: 1px solid #27272a; border-radius: 10px; padding: 18px 22px; gap: 0; }
+  .pipe-s { font-size: 14px; font-weight: 600; color: #d4d4d8; padding: 8px 16px; border-radius: 8px; white-space: nowrap; }
+  .pipe-s.ok { color: #4ade80; background: #052e16; }
+  .pipe-s.bad { color: #fca5a5; background: #450a0a; border: 1px solid #7f1d1d; }
+  .pipe-a { color: #52525b; padding: 0 8px; font-size: 18px; flex-shrink: 0; }
+  .pipe-detail { font-size: 14px; color: #a1a1aa; margin-top: 12px; line-height: 1.7; padding: 0 4px; }
+  .pipe-detail strong { color: #e4e4e7; }
+
+  /* ---- Two col ---- */
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ---- Card ---- */
+  .card { background: #141416; border: 1px solid #27272a; border-radius: 10px; padding: 22px; }
+  .card h3 { font-size: 17px; font-weight: 700; color: #fafafa; margin-bottom: 6px; }
+  .card .sub { font-size: 13px; color: #a1a1aa; margin-bottom: 16px; }
+
+  /* Action items */
+  .act { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #27272a; }
+  .act:last-child { border-bottom: none; }
+  .act-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 3px; }
+  .act-tag.done { background: #052e16; color: #86efac; }
+  .act-tag.set { background: #172554; color: #93c5fd; }
+  .act-tag.talk { background: #422006; color: #fdba74; }
+  .act h4 { font-size: 15px; font-weight: 600; color: #fafafa; }
+  .act p { font-size: 13px; color: #a1a1aa; line-height: 1.6; }
+
+  /* Compare */
+  .cmp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .cmp-box { padding: 16px; border-radius: 8px; }
+  .cmp-box.a { background: #1f0a0a; border: 1px solid #7f1d1d44; }
+  .cmp-box.b { background: #0a1f0a; border: 1px solid #14532d44; }
+  .cmp-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .cmp-box.a h4 { color: #f87171; }
+  .cmp-box.b h4 { color: #4ade80; }
+  .cmp-li { font-size: 13px; color: #d4d4d8; line-height: 1.8; }
+  .cmp-li strong { color: #fafafa; }
+  .card .note { font-size: 13px; color: #a1a1aa; line-height: 1.7; }
+  .card .note strong { color: #fafafa; }
+
+  /* ---- Metric cards ---- */
+  .mc { background: #141416; border: 1px solid #27272a; border-radius: 10px; padding: 20px 22px; cursor: pointer; transition: border-color .2s; }
+  .mc:hover { border-color: #3f3f46; }
+  .mc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .mc-name { font-size: 16px; font-weight: 700; color: #fafafa; }
+  .mc-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 5px; }
+  .mc-badge.ok { background: #052e16; color: #86efac; }
+  .mc-badge.wait { background: #422006; color: #fdba74; }
+  .mc-badge.no { background: #450a0a; color: #fca5a5; }
+  .mc-desc { font-size: 14px; color: #a1a1aa; margin-bottom: 10px; line-height: 1.6; }
+  .mc-now { font-size: 14px; padding: 8px 12px; background: #09090b; border-radius: 6px; color: #d4d4d8; }
+  .mc-now b { color: #fafafa; }
+  .mc-detail { display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid #27272a; font-size: 13px; color: #a1a1aa; line-height: 1.9; }
+  .mc-detail strong { color: #e4e4e7; }
+  .mc.open .mc-detail { display: block; }
+  .mc-expand { font-size: 12px; color: #71717a; text-align: right; margin-top: 8px; }
+  .mc.open .mc-expand { display: none; }
+
+  /* Before/After table */
+  .ba-tbl { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .ba-tbl th, .ba-tbl td { padding: 10px 14px; text-align: left; font-size: 14px; border-bottom: 1px solid #27272a; }
+  .ba-tbl th { color: #a1a1aa; font-weight: 600; font-size: 13px; }
+  .ba-tbl td { color: #d4d4d8; }
+  .ba-tbl .red { color: #f87171; }
+  .ba-tbl .grn { color: #4ade80; }
+
+  /* ---- Discuss ---- */
+  .disc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .d-card { background: #141416; border: 1px solid #27272a; border-left: 4px solid #3b82f6; border-radius: 0 10px 10px 0; padding: 22px; }
+  .d-num { font-size: 24px; font-weight: 800; color: #3b82f6; margin-bottom: 8px; }
+  .d-text { font-size: 17px; color: #fafafa; font-weight: 600; margin-bottom: 6px; }
+  .d-sub { font-size: 14px; color: #a1a1aa; line-height: 1.7; }
+
+  @media (max-width: 1024px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+    .cols3 { grid-template-columns: 1fr 1fr; }
+    .disc { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .dash { padding: 16px; }
+    .stats, .cols2, .cols3 { grid-template-columns: 1fr; }
+    .pipe { flex-wrap: wrap; justify-content: center; }
+    .cmp-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="dash">
+
+<div class="hdr">
+  <h1>MarketMarket 개발 현황</h1>
+  <span>marketmarket-dev 실측 | 2026-05-13</span>
+</div>
+
+<!-- ===== 1. 현재 상태 ===== -->
+<div class="sec">
+  <div class="sec-hdr">
+    <div class="sec-title">현재 상태</div>
+    <div class="sec-note">최근 PR 100건 + 배포 이력 직접 분석</div>
+  </div>
+  <div class="stats">
+    <div class="st red">
+      <span class="st-tag crit">병목</span>
+      <div class="st-label">staging 적체 (main 대비)</div>
+      <div class="st-val">86커밋</div>
+      <div class="st-desc">코드는 계속 나오는데, 프로덕션에 반영되지 않고 쌓이는 중. 최근 Production 배포 5/12 02:00 (1회).</div>
+    </div>
+    <div class="st grn">
+      <span class="st-tag ok">양호</span>
+      <div class="st-label">한번에 완료율</div>
+      <div class="st-val">92%</div>
+      <div class="st-desc">100건 중 hotfix 8건. 코드 품질은 나쁘지 않음.</div>
+    </div>
+    <div class="st grn">
+      <div class="st-label">PR 머지 속도</div>
+      <div class="st-val">0~2h</div>
+      <div class="st-desc">PR 생성 ~ staging 머지. 코드 반영 자체는 빠름.</div>
+    </div>
+    <div class="st red">
+      <span class="st-tag crit">끊김</span>
+      <div class="st-label">이슈-PR 연결</div>
+      <div class="st-val">0건</div>
+      <div class="st-desc">최근 10건 PR에 이슈 번호가 없음. 리드타임 추적 불가.</div>
+    </div>
+    <div class="st ylw">
+      <span class="st-tag warn">주의</span>
+      <div class="st-label">프로덕션 배포 (main 머지)</div>
+      <div class="st-val">주 3~4회</div>
+      <div class="st-desc">30일 평균. 단, 편차 큼 (4/16 16건 vs 최근 5일 6건). 비정기 승격.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2. 파이프라인 ===== -->
+<div class="sec">
+  <div class="sec-hdr"><div class="sec-title">배포 파이프라인</div></div>
+  <div class="pipe">
+    <div class="pipe-s">이슈</div><div class="pipe-a">&rarr;</div>
+    <div class="pipe-s">PR</div><div class="pipe-a">&rarr;</div>
+    <div class="pipe-s ok">staging 머지 (0~2h)</div><div class="pipe-a">&rarr;</div>
+    <div class="pipe-s bad">main 승격 (비정기, 86커밋 적체)</div><div class="pipe-a">&rarr;</div>
+    <div class="pipe-s ok">Vercel 배포 (~4분)</div>
+  </div>
+  <div class="pipe-detail">
+    <strong>잘 되는 구간:</strong> 이슈 &rarr; PR &rarr; staging (빠르고, 품질 92%) &nbsp;|&nbsp;
+    <strong style="color:#f87171;">병목:</strong> staging &rarr; main (팀 리드 수동, 비정기) &nbsp;|&nbsp;
+    <strong>자동 구간:</strong> main 머지 후 Vercel (~4분, 문제 없음)
+  </div>
+</div>
+
+<!-- ===== 3. 바로 할 수 있는 것 + 리뷰 체계 ===== -->
+<div class="sec">
+  <div class="sec-hdr"><div class="sec-title">바로 할 수 있는 것 + 리뷰 체계</div></div>
+  <div class="cols2">
+
+    <div class="card">
+      <h3>바로 할 수 있는 것</h3>
+      <div class="sub">도구보다 프로세스를 먼저 잡으면 효과가 바로 남</div>
+      <div class="act">
+        <span class="act-tag set">준비됨</span>
+        <div><h4>PR 템플릿</h4><p>이슈 연결(Refs #), 검증 체크리스트, 크기(S/M/L), 도구 사용 여부. 적용하면 다음 PR부터 반영.</p></div>
+      </div>
+      <div class="act">
+        <span class="act-tag talk">합의</span>
+        <div><h4>승격 주기 확정</h4><p>예: 매주 화/금 정기 승격. 86커밋 적체의 직접적인 해결책. 주기만 정하면 가장 큰 병목 해소.</p></div>
+      </div>
+      <div class="act">
+        <span class="act-tag set">습관</span>
+        <div><h4>PR에 이슈 번호 연결</h4><p>feature PR에 Refs #번호, 승격 PR에 Closes #번호. 이것만 하면 리드타임 자동 추적 가능.</p></div>
+      </div>
+
+      <table class="ba-tbl">
+        <tr><th>항목</th><th>지금</th><th>적용 후</th></tr>
+        <tr><td>이슈-PR 연결</td><td class="red">0건</td><td class="grn">자동 연결</td></tr>
+        <tr><td>staging 적체</td><td class="red">86커밋 (비정기)</td><td class="grn">주 2회 정기 승격</td></tr>
+        <tr><td>리드타임 측정</td><td class="red">불가</td><td class="grn">자동 추적</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>리뷰 체계: 봇이 이미 하고 있다</h3>
+      <div class="sub">현재 전 PR을 despread-declaw 봇이 리뷰 중. 최근 10건 PR 전부 봇 승인으로 머지. 봇 리뷰 자체는 잘 작동하고 있음.</div>
+
+      <div class="cmp-row">
+        <div class="cmp-box a">
+          <h4>모든 PR에 사람 리뷰 강제</h4>
+          <div class="cmp-li">PR마다 리뷰 대기 발생</div>
+          <div class="cmp-li">현재 0~2시간 &rarr; 반나절+ 지연</div>
+          <div class="cmp-li">6명 팀에서 리뷰어 병목</div>
+          <div class="cmp-li">형식적 승인으로 변질 위험</div>
+        </div>
+        <div class="cmp-box b">
+          <h4>고위험 PR만 사람 리뷰 (권장)</h4>
+          <div class="cmp-li"><strong>일반 PR:</strong> 봇 리뷰 유지 (현행)</div>
+          <div class="cmp-li"><strong>DB 스키마 변경:</strong> 사람 필수</div>
+          <div class="cmp-li"><strong>인증/결제/보안:</strong> 사람 필수</div>
+          <div class="cmp-li"><strong>10+ 파일 변경 (L):</strong> 사람 권장</div>
+        </div>
+      </div>
+      <div class="note">
+        &rarr; 전체 사람 리뷰 강제보다 <strong>"봇 기본 + 고위험만 사람"</strong>이 6명 팀에 현실적.<br>
+        &rarr; 고위험 범위와 리뷰 담당은 팀에서 합의. 봇 리뷰 품질이 떨어지면 그때 범위를 넓히면 됨.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4. 측정 지표 ===== -->
+<div class="sec">
+  <div class="sec-hdr">
+    <div class="sec-title">측정 지표</div>
+    <div class="sec-note">카드 클릭 시 상세 보기</div>
+  </div>
+  <div class="cols3">
+
+    <div class="mc" onclick="this.classList.toggle('open')">
+      <div class="mc-top">
+        <div class="mc-name">1. 이슈 &rarr; 배포 리드타임</div>
+        <span class="mc-badge no">연결 0건</span>
+      </div>
+      <div class="mc-desc">이슈 생성부터 프로덕션 배포까지 걸린 시간. 가장 중요한 속도 지표.</div>
+      <div class="mc-now">현재: <b>이슈 연결 0건 - Refs # 컨벤션 필요</b></div>
+      <div class="mc-expand">클릭하여 상세 보기</div>
+      <div class="mc-detail">
+        <strong>세부 구간 4개:</strong><br>
+        (1) 이슈 생성 &rarr; PR 착수 (착수까지 대기)<br>
+        (2) PR 생성 &rarr; staging 머지 (리뷰/수정, 현재 0~2h)<br>
+        (3) staging 머지 &rarr; main 승격 (현재 최대 병목)<br>
+        (4) main 머지 &rarr; Vercel 배포 (~4분, 자동)<br><br>
+        <strong>공식:</strong> Production 배포 시점 - 이슈 생성 시점 (중앙값 + 상위 75%)<br>
+        <strong>집계 대상:</strong> [feat]/[bug] 이슈만. [chore]/[idea]는 별도.<br>
+        <strong>조작 방지:</strong> 이슈 생성 시점은 GitHub 자동 기록. "이슈 생성 시점 &lt; 첫 커밋 시점" 조건 확인으로 소급 생성 탐지. 변경 파일 수(files changed)도 참고값으로 저장.<br>
+        <strong>주의:</strong> feature PR은 staging 대상이라 Closes #가 이슈를 자동 종료하지 않음. Refs # 사용 후, 승격 PR에서 Closes #.
+      </div>
+    </div>
+
+    <div class="mc" onclick="this.classList.toggle('open')">
+      <div class="mc-top">
+        <div class="mc-name">2. 승격 대기 시간</div>
+        <span class="mc-badge no">86커밋 적체</span>
+      </div>
+      <div class="mc-desc">staging 머지 후 main 승격까지 대기. 릴리스 운영 성숙도 지표.</div>
+      <div class="mc-now">현재: <b style="color:#f87171;">86커밋 적체 - 가장 큰 병목</b></div>
+      <div class="mc-expand">클릭하여 상세 보기</div>
+      <div class="mc-detail">
+        <strong>왜 별도 지표인가:</strong> "개발이 느린 건지, 승격이 안 되는 건지" 구분하려면 리드타임과 분리해야 함. 지금은 코드가 빨리 나와도 승격이 안 돼서 프로덕션에 반영이 안 되는 상태.<br><br>
+        <strong>공식:</strong> main 승격 PR 머지 시점 - staging 머지 시점 (중앙값)<br>
+        <strong>목표 SLA:</strong> 일반 건 24시간 내, P0(긴급) 당일 승격<br>
+        <strong>개선안:</strong> 정기 승격 주기 (주 2회) + release captain 로테이션 또는 백업 담당자 지정
+      </div>
+    </div>
+
+    <div class="mc" onclick="this.classList.toggle('open')">
+      <div class="mc-top">
+        <div class="mc-name">3. 한번에 완료율</div>
+        <span class="mc-badge ok">92%</span>
+      </div>
+      <div class="mc-desc">배포 후 7일 내 hotfix/롤백/버그 없이 유지된 비율. 팀 품질 지표.</div>
+      <div class="mc-now">현재: <b style="color:#4ade80;">92% (100건 중 hotfix 8건) - 바로 쓸 수 있는 지표</b></div>
+      <div class="mc-expand">클릭하여 상세 보기</div>
+      <div class="mc-detail">
+        <strong>측정 방법:</strong> hotfix/* 브랜치 PR + [bug] 이슈 재오픈 자동 탐지. AGENTS.md에 hotfix 컨벤션이 이미 정의되어 있어 자동 식별 가능.<br><br>
+        <strong>공식:</strong> 7일 내 후속 작업(hotfix/bug/reopen) 없는 배포 건수 / 전체 배포 건수<br>
+        <strong>조작 방지:</strong> hotfix 외에 동일 파일 경로를 다시 수정한 PR도 보조 탐지. P0/P1은 14일 윈도우도 병행.<br>
+        <strong>주의:</strong> 팀 전체 품질 지표로만 사용. 개인 평가에 쓰면 버그 보고를 꺼리게 됨.<br>
+        <strong>최근 hotfix:</strong> #629 kol-cache, #627 kol-cache-v2, #617 kol-port, #602 whale-tracker, #579 amplitude, #559 ai-search, #546 hero-curation, #543 admin-hero
+      </div>
+    </div>
+
+    <div class="mc" onclick="this.classList.toggle('open')">
+      <div class="mc-top">
+        <div class="mc-name">4. 검증 충분 배포 비율</div>
+        <span class="mc-badge wait">템플릿 정착 후</span>
+      </div>
+      <div class="mc-desc">충분한 검증을 거쳐 머지된 PR의 비율. 검증 프로세스 성숙도.</div>
+      <div class="mc-now">현재: <b>PR 템플릿 생성 완료, 정착 후 측정 시작</b></div>
+      <div class="mc-expand">클릭하여 상세 보기</div>
+      <div class="mc-detail">
+        <strong>점수 기준 (4점 만점):</strong><br>
+        - 봇 또는 사람 리뷰 통과: 1점<br>
+        - Vercel Preview 정상 배포: 1점<br>
+        - 검증 체크리스트 완료: 1점<br>
+        - 배포 후 7일 무사고: 1점<br>
+        팀 지표 = 4점 중 3점 이상 비율<br><br>
+        <strong>조작 방지:</strong> 실제 GitHub review event와 Vercel deployment status 확인. 작성자 외 1명 이상만 인정. [feat]/[bug]와 [chore]는 분모 분리.<br>
+        <strong>단계별 강화:</strong> (1) 지금: PR 템플릿 체크리스트 (2) 다음: 고위험 PR 사람 리뷰 도입 (3) 이후: CI (typecheck + lint) 추가
+      </div>
+    </div>
+
+    <div class="mc" onclick="this.classList.toggle('open')">
+      <div class="mc-top">
+        <div class="mc-name">5. 사람 리뷰 대기 시간</div>
+        <span class="mc-badge wait">리뷰 도입 후</span>
+      </div>
+      <div class="mc-desc">사람 리뷰가 필요한 PR에서 첫 리뷰까지 걸린 대기 시간.</div>
+      <div class="mc-now">현재: <b>사람 리뷰 미운영. 도입 후 측정 시작</b></div>
+      <div class="mc-expand">클릭하여 상세 보기</div>
+      <div class="mc-detail">
+        <strong>왜 필요한가:</strong> 사람 리뷰를 도입하면 리뷰 대기가 새로운 병목이 될 수 있음. 이 시간을 추적해야 리뷰 체계가 속도를 잡아먹는지 확인 가능.<br><br>
+        <strong>공식:</strong> 사람 리뷰 PR의 (첫 리뷰 시점 - PR 생성 시점) 중앙값/상위 75%<br>
+        <strong>데이터:</strong> GitHub PR timeline events API. 봇 리뷰 제외, 사람 리뷰만 집계.<br>
+        <strong>조작 방지:</strong> GitHub 자동 기록이라 조작 불가.
+      </div>
+    </div>
+
+    <div class="mc" onclick="this.classList.toggle('open')">
+      <div class="mc-top">
+        <div class="mc-name">6. 도구 사용 투명성</div>
+        <span class="mc-badge wait">템플릿 정착 후</span>
+      </div>
+      <div class="mc-desc">외부 도구를 사용한 PR 중 사람이 코드를 직접 검토한 비율.</div>
+      <div class="mc-now">현재: <b>PR 템플릿 미적용. 데이터 없음</b></div>
+      <div class="mc-expand">클릭하여 상세 보기</div>
+      <div class="mc-detail">
+        <strong>측정 방법:</strong> PR 템플릿 체크박스로 수집. 본인이 직접 체크하는 방식이라 정확도에 한계가 있음.<br><br>
+        <strong>용도:</strong> 팀 투명성 확인용. 개인 평가에는 사용하지 않음.<br>
+        <strong>보완:</strong> 월 1회 샘플 점검 병행. "사용 안 함 / 사용함 / 불명" 3가지 선택지가 더 솔직한 데이터를 만듦.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 5. 운영 구조 ===== -->
+<div class="sec">
+  <div class="sec-hdr"><div class="sec-title">운영 구조</div></div>
+  <div class="cols3">
+    <div class="card">
+      <h3>월간 운영판</h3>
+      <div class="sub">매월 30분 리뷰 (Slack 자동 요약)</div>
+      <div style="font-size:14px; color:#d4d4d8; line-height:1.9;">
+        &bull; 이슈 &rarr; 배포 리드타임 (중앙값/상위75%)<br>
+        &bull; 승격 대기 시간<br>
+        &bull; 한번에 완료율<br>
+        &bull; 검증 충분 배포 비율<br>
+        &bull; 고위험 PR 리뷰 시간<br>
+        &bull; 도구 사용 투명성
+      </div>
+    </div>
+    <div class="card">
+      <h3>월간 목표 리뷰</h3>
+      <div class="sub">매월 30분 미팅</div>
+      <div style="font-size:14px; color:#d4d4d8; line-height:1.9;">
+        &bull; 핵심 목표 3개 완료/배포/사용 전환 여부<br>
+        &bull; 팀 레버리지 (다른 사람이 독립적으로 끝낸 일)<br>
+        &bull; 배포 후 실제 사용 (Amplitude 이벤트)<br>
+        &bull; 비개발자 기여 확인
+      </div>
+    </div>
+    <div class="card">
+      <h3>분기 정성 리뷰</h3>
+      <div class="sub">셀프/피어리뷰 (기존 방식)</div>
+      <div style="font-size:14px; color:#d4d4d8; line-height:1.9;">
+        &bull; 문제 선정 능력<br>
+        &bull; 실패에서 배운 것<br>
+        &bull; 팀 공용 자산 기여<br>
+        &bull; 다른 사람의 생산성을 올렸는가
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6. 논의 사항 ===== -->
+<div class="sec">
+  <div class="sec-hdr"><div class="sec-title">오늘 논의 사항</div></div>
+  <div class="disc">
+    <div class="d-card">
+      <div class="d-num">1</div>
+      <div class="d-text">승격 주기를 정하자</div>
+      <div class="d-sub">staging에 86커밋 적체. 주 2회(예: 화/금) 정기 승격만으로 가장 큰 병목이 해소됨. 이것 없이 다른 지표를 보는 건 의미가 없음.</div>
+    </div>
+    <div class="d-card">
+      <div class="d-num">2</div>
+      <div class="d-text">사람 리뷰가 필요한 범위를 정하자</div>
+      <div class="d-sub">전체 필수 vs 고위험만(DB/인증/L사이즈). 봇 리뷰가 잘 돌고 있으니 범위를 좁히는 게 현실적. 봇 품질 문제가 생기면 그때 확대.</div>
+    </div>
+    <div class="d-card">
+      <div class="d-num">3</div>
+      <div class="d-text">비개발자 기여는 어떻게 볼 것인가</div>
+      <div class="d-sub">PR 기반 지표로는 기획/운영/콘텐츠 기여가 안 잡힘. 월간 목표 리뷰에서 별도 확인이 현실적. 모든 기여를 하나의 판으로 억지로 묶을 필요 없음.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
