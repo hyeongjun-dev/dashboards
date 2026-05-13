@@ -266,7 +266,7 @@
         (3) staging 머지 &rarr; main 승격 (현재 최대 병목)<br>
         (4) main 머지 &rarr; Vercel 배포 (~4분, 자동)<br><br>
         <strong>공식:</strong> Production 배포 시점 - 이슈 생성 시점 (중앙값 + 상위 75%)<br>
-        <strong>집계 대상:</strong> [feat]/[bug] 이슈만. [chore]/[idea]는 별도.<br>
+        <strong>집계 대상:</strong> 이슈 유형 구분 없이 전체.<br>
         <strong>조작 방지:</strong> 이슈 생성 시점은 GitHub 자동 기록. "이슈 생성 시점 &lt; 첫 커밋 시점" 조건 확인으로 소급 생성 탐지. 변경 파일 수(files changed)도 참고값으로 저장.<br>
         <strong>주의:</strong> feature PR은 staging 대상이라 Closes #가 이슈를 자동 종료하지 않음. Refs # 사용 후, 승격 PR에서 Closes #.
       </div>
